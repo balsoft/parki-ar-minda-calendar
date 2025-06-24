@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>parki ar minda calendar</title>
+
+    <meta charset='utf-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <script src="https://unpkg.com/ical.js/dist/ical.es5.min.cjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.17/index.global.min.js"></script>
+
+    <link rel="stylesheet" href="static/main.css">
+
+    <script src="config.js"></script>
+    <script src="static/main.js"></script>
+</head>
+<body>
+    <header><h1><a href="https://parkiarminda.ge">parki ar minda</a> calendar</h1></header>
+    <hr>
+    
+    <div id='calendar'></div>
+
+    <div class="box-tip" >
+        <p><b>💡 Tip</b>: to import the ics feeds to your calendar app, download the ics or copy the corresponding link address from this box.</p>
+        <div id="legend-feeds"></div>
+    </div>
+
+    <footer><span>🄯 balsoft 2025</span> • <a href="https://github.com/balsoft/parki-ar-minda-calendar">Source code</a></footer>
+</body>
+</html>

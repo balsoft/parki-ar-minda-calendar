@@ -1,0 +1,3 @@
+pamConfig = {
+	icsDirectory: "ics"
+}

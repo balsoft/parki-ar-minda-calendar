@@ -9,7 +9,7 @@ function data_req (url, callback, responseType) {
 function hash_code(string) {
     h = 0
     for (i = 0; i < string.length; i++) {
-        h = string.charCodeAt(i) + ((h << 5) - h);
+        h = string.charCodeAt(i) + ((h << 7) - h);
     }
     return h
 }
@@ -34,56 +34,136 @@ function toggleVis(id) {
     $("#calendar-feed-" + id).toggleClass("disabled")
     if (event)
         event.remove()
-    else
+    else {
         document.calendar.addEventSource(makeSource(id + ".ics"))
+        if (document.location.hash != `#${id}`)
+            history.pushState(null, null, ' ')
+    }
+}
+
+function hashchange() {
+    for (source of document.sources) {
+        var checkbox = $(`#calendar-feed-${source.id} input`)
+        if (document.location.hash != "") {
+            if (document.location.hash == `#${source.id}`) {
+                if (!checkbox.is(':checked')) checkbox.click()
+            } else {
+                if (checkbox.is(':checked')) checkbox.click()
+            }
+        } else {
+            if (!checkbox.is(':checked')) checkbox.click()
+        }
+    }
 }
 
 document.addEventListener("DOMContentLoaded", async function() {
     const sources = await fetchSources()
+    document.sources = sources
 
     for (source of sources) {
-        var link = source.url.match("https://") ? source.url :`${window.location.href}/${source.url}`
+        var link = source.url.match("https://") ? source.url :`${document.location}/${source.url}`
         
         $("#legend-feeds").append(`
             <div class="calendar-feed" id="calendar-feed-${source.id}">
                 <input type=checkbox checked onclick="toggleVis('${source.id}')" style="accent-color: ${source.color}"/>
-                <span><a href="${source.url}" style="color: black">${source.id}</a></span>
+                <span><a href="${source.url}" style="color: black" class="source-id">${source.id}</a></span>
                 <span title="Copy ics URL to clipboard" style="cursor: default" onclick="navigator.clipboard.writeText('${link}')">🔗</span>
+                <a href="#${source.id}" style="color: black; text-decoration: none" title="Only show ${source.id}">👁</a>
             </div>
         `)
+
     }
     
     document.calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         plugins: [ FullCalendar.ICalendar.default ],
+
         headerToolbar: {
            start: "prev,next today",
-           center: "title",
-           end: "dayGridMonth,timeGridWeek,timeGridDay,listYear" 
+           center: (window.innerWidth > 700) ? "title" : "",
+           end: (window.innerWidth > 700) ? "dayGridMonth,timeGridWeek,timeGridDay,listYear" : "timeGridThreeDay,timeGridDay,listYear",
         },
+
+        initialView: (window.innerWidth > 700) ? "timeGridWeek" : "timeGridThreeDay",
+
+        views: {
+            timeGridThreeDay: {
+                type: 'timeGrid',
+                duration: { days: 3 },
+                buttonText: '3 days'
+            }
+        },
+        
         firstDay: 1,
+
+
+        themeSystem: "bootstrap5",
         height: "auto",
-        initialView: "timeGridWeek",
-        eventSources: sources,
         nowIndicator: true,
+
+        eventSources: sources,
+        
+        eventTimeFormat: { // like '14:30'
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false,
+            hour12: false,
+        },
+
         eventTextColor: "black",
         // Runs when the event is added to DOM
         eventDidMount: function(info) {
             // To prevent clutter
             info.event.setProp("title", info.event.title.replace("parki ar minda — ", ""))
             
-            // Add a tooltip with event description
+            // Add a popover (window that opens when you click it) with event description
             $(info.el).attr("title", info.event.extendedProps.description)
 
-            // Go to the URL specified in the location when the event is clicked
-            var url = info.event.extendedProps.url || (info.event.extendedProps.location || "").match(/https:\/\/[^ ]*/)[0]
-            $(info.el).click(function() { window.open(url, "_blank") })
+            function pad0(length, what) {
+                return what.toString().padStart(length, "0")
+            }
+
+            var iso = `${pad0(4, info.event.start.getFullYear())}-${pad0(2, info.event.start.getMonth())}-${pad0(2, info.event.start.getDate())}`
+
+            function renderTime(time) { return `${pad0(2, time.getHours())}:${pad0(2, time.getMinutes())}` }
+
+            var content = `<b>📅</b> ${iso}<br><b>⏰</b> ${renderTime(info.event.start)} - ${renderTime(info.event.end)}`
+
+            if (info.event.extendedProps.location) {
+                var location = info.event.extendedProps.location.replace(/https:\/\/[^ ]*/, "").replace("\n", "<br>")
+                var locationUrl = (info.event.extendedProps.location.match(/https:\/\/[^ ]*/) || [])[0]
+                content += `<hr><b>📍</b>`
+                if (locationUrl)
+                    content += `<a href="${locationUrl}">`
+
+                content += location
+
+                if (locationUrl)
+                    content += `</a>`
+            }
+            if (info.event.url) {
+                content += `<hr><a href=${info.event.url}><b>🔗</b> More details...</a>`
+            }
+
+            $(info.el).popover({
+                placement: "top",
+                content: content,
+                html: true,
+                container: "body"
+            })
 
             // Change cursor
             $(info.el).css("cursor", "pointer")
         },
+        // Prevent just following the event URL, open a popover instead
+        eventClick: function(info) {
+            info.jsEvent.preventDefault()
+        }
     })
 
     document.calendar.render()
+
+    hashchange()
+    $(window).on('hashchange', hashchange)
 })
 
 

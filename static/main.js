@@ -100,6 +100,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         height: "auto",
         nowIndicator: true,
 
+        locale: "en-gb",
+
         eventSources: sources,
         
         eventTimeFormat: { // like '14:30'
@@ -122,11 +124,12 @@ document.addEventListener("DOMContentLoaded", async function() {
                 return what.toString().padStart(length, "0")
             }
 
-            var iso = `${pad0(4, info.event.start.getFullYear())}-${pad0(2, info.event.start.getMonth())}-${pad0(2, info.event.start.getDate())}`
+            // How does this even work...
+            var date = document.calendar.formatDate(info.event.start, { year: "numeric", month: "short", day: "numeric", weekday: "long" })
 
             function renderTime(time) { return `${pad0(2, time.getHours())}:${pad0(2, time.getMinutes())}` }
 
-            var content = `<b>📅</b> ${iso}<br><b>⏰</b> ${renderTime(info.event.start)} - ${renderTime(info.event.end)}`
+            var content = `<b>📅</b> ${date}<br><b>⏰</b> ${renderTime(info.event.start)} - ${renderTime(info.event.end)}`
 
             if (info.event.extendedProps.location) {
                 var location = info.event.extendedProps.location.replace(/https:\/\/[^ ]*/, "").replace("\n", "<br>")

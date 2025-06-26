@@ -20,7 +20,7 @@ function hash_color(string) {
 
 
 function makeSource(source) {
-    return { id: source.replace(".ics", ""), url: `${pamConfig.icsDirectory}/${source}`, format: "ics", color: hash_color(source) }
+    return { id: source.replace(".ics", ""), url: `${pamConfig.icsDirectory}/${source}`, format: "ics" }
 }
 
 async function fetchSources() {
@@ -57,10 +57,15 @@ function hashchange() {
 }
 
 document.addEventListener("DOMContentLoaded", async function() {
-    const sources = await fetchSources()
-    document.sources = sources
+    document.sources = await fetchSources()
 
-    for (source of sources) {
+    for (source of document.sources) {
+        let sourceInfo = await fetch(source.url)
+
+        jcal = ICAL.parse(await sourceInfo.text())
+        source.color = (new ICAL.Component(jcal)).getFirstPropertyValue("color")
+        if (!source.color) source.color = hash_color(source.id)
+
         var link = source.url.match("https://") ? source.url :`${document.location}/${source.url}`
         
         $("#legend-feeds").append(`
@@ -102,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         locale: "en-gb",
 
-        eventSources: sources,
+        eventSources: document.sources,
         
         eventTimeFormat: { // like '14:30'
             hour: '2-digit',

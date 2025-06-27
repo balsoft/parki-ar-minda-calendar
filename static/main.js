@@ -9,33 +9,54 @@ function data_req (url, callback, responseType) {
 function hash_code(string) {
     h = 0
     for (i = 0; i < string.length; i++) {
-        h = string.charCodeAt(i) + ((h << 7) - h);
+        h = string.charCodeAt(i) + ((h << 8) - h);
     }
     return h
 }
 
 function hash_color(string) {
-    return 'hsl('+hash_code(string)%360+', 100%, 80%)'
+    return 'hsl('+hash_code(string)%360+', 100%, 60%)'
 }
 
+function isLight(color) {
+    // Counting the perceptive luminance - human eye favors green color...
+    luminance = (0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue())/255;
+    return luminance >= 0.65
+}
 
-function makeSource(source) {
-    return { id: source.replace(".ics", ""), url: `${pamConfig.icsDirectory}/${source}`, format: "ics" }
+async function makeSource(source) {
+    let url = `${pamConfig.icsDirectory}/${source}`
+    let sourceInfo = await fetch(url)
+
+    jcal = ICAL.parse(await sourceInfo.text())
+    color = (new ICAL.Component(jcal)).getFirstPropertyValue("color") || hash_color(source)
+    textColor = isLight(jQuery.Color(color)) ? "black" : "white";
+    return { id: source.replace(".ics", ""), url, format: "ics", color, textColor}
 }
 
 async function fetchSources() {
-    const response = await fetch(pamConfig.icsDirectory)
-    const json = await response.json()
-    return json.map(function(entry) { return entry.name }).map(makeSource)
+    if (pamConfig.icsType == "webdav") {
+        const client = WebDAV.createClient(pamConfig.icsDirectory)
+        const contents = await client.getDirectoryContents("/")
+        names = contents.map((entry) => { return entry.filename.replace(/^\//, "") })
+    } else if (pamConfig.icsType = "autoindex") {
+        const response = await fetch(pamConfig.icsDirectory)
+        const json = await response.json()
+        names = json.map(function(entry) { return entry.name })
+    } else {
+        window.alert("Incorrect source type specified, ignoring")
+    }
+    return Promise.all(names.map(makeSource))
+
 }
 
-function toggleVis(id) {
+async function toggleVis(id) {
     var event = document.calendar.getEventSourceById(id)
     $("#calendar-feed-" + id).toggleClass("disabled")
     if (event)
         event.remove()
     else {
-        document.calendar.addEventSource(makeSource(id + ".ics"))
+        document.calendar.addEventSource(await makeSource(id + ".ics"))
         if (document.location.hash != `#${id}`)
             history.pushState(null, null, ' ')
     }
@@ -44,28 +65,25 @@ function toggleVis(id) {
 function hashchange() {
     for (source of document.sources) {
         var checkbox = $(`#calendar-feed-${source.id} input`)
+        const checked = checkbox.is(':checked')
         if (document.location.hash != "") {
             if (document.location.hash == `#${source.id}`) {
-                if (!checkbox.is(':checked')) checkbox.click()
+                if (!checked) checkbox.click()
             } else {
-                if (checkbox.is(':checked')) checkbox.click()
+                if (checked) checkbox.click()
             }
         } else {
-            if (!checkbox.is(':checked')) checkbox.click()
+            if (!checked) checkbox.click()
         }
     }
 }
 
+const sourcesPromise = fetchSources()
+
 document.addEventListener("DOMContentLoaded", async function() {
-    document.sources = await fetchSources()
+    document.sources = await sourcesPromise
 
     for (source of document.sources) {
-        let sourceInfo = await fetch(source.url)
-
-        jcal = ICAL.parse(await sourceInfo.text())
-        source.color = (new ICAL.Component(jcal)).getFirstPropertyValue("color")
-        if (!source.color) source.color = hash_color(source.id)
-
         var link = source.url.match("https://") ? source.url :`${document.location}/${source.url}`
         
         $("#legend-feeds").append(`
@@ -116,7 +134,6 @@ document.addEventListener("DOMContentLoaded", async function() {
             hour12: false,
         },
 
-        eventTextColor: "black",
         // Runs when the event is added to DOM
         eventDidMount: function(info) {
             // To prevent clutter

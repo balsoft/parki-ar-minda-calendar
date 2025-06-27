@@ -1,3 +1,4 @@
 pamConfig = {
-	icsDirectory: "ics"
+	icsDirectory: "ics",
+	icsType: "webdav"
 }

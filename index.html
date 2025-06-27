@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>parki ar minda calendar</title>
+  <title>parki ar minda calendar</title>
 
-    <meta charset='utf-8' />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src="https://code.jquery.com/color/jquery.color.plus-names-3.0.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webdav@4.11.5/dist/web/webdav.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/ical.js/dist/ical.es5.min.cjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.17/index.global.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+  <script src="https://code.jquery.com/color/jquery.color.plus-names-3.0.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/webdav@4.11.5/dist/web/webdav.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/ical.js/dist/ical.es5.min.cjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.17/index.global.min.js"></script>
 
-    <script src="config.js"></script>
-    <script src="static/main.js"></script>
+  <script src="config.js"></script>
+  <script src="static/main.js"></script>
 
-    <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="static/main.css">
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/main.css">
 </head>
+
 <body>
-    <header><h1><a href="https://parkiarminda.ge" style="color: black">parki ar minda</a> calendar</h1></header>
-    <hr/>
-    
-    <div class="box-warn">
-        <p><b>❗ Attention:</b> <b>do not leave anything</b> in front of garages during off-time.</p>
-    </div>
-    
-    <div class="box-tip">
-        <p><b>💡 Tip: </b> take a look at the <a href="https://docs.google.com/presentation/d/1Aylw_Z9w9dNy0C43RELSntv-6CNmQW0sAEh89NDlqyE/view">sorting guidelines</a> before visiting a garage.</p>
-    </div>
-    <div id='calendar'></div>
+  <header>
+    <h1><a href="https://parkiarminda.ge" style="color: black">parki ar minda</a> calendar</h1>
+  </header>
+  <hr />
 
-    <div class="box-tip" >
-        <p><b>📅 Calendar sources</b> • <button class='custom-button' onclick='history.pushState(null, null, " "); hashchange()'>show all</button></p>
-        <div id="legend-feeds"></div>
-        <p><small><b>💡 Tips:</b> you can show only one calendar by clicking (👁) • to import the ics feeds to your calendar app, download the ics or copy (🔗) the corresponding link address from this box</small></p>
-    </div>
+  <div class="box-warn">
+    <p><b>❗ Attention:</b> <b>do not leave anything</b> in front of garages during off-time.</p>
+  </div>
 
-    <footer><span>🄯 balsoft 2025</span> • <a href="https://github.com/balsoft/parki-ar-minda-calendar">Source code</a></footer>
+  <div class="box-tip">
+    <p><b>💡 Tip: </b> take a look at the <a
+        href="https://docs.google.com/presentation/d/1Aylw_Z9w9dNy0C43RELSntv-6CNmQW0sAEh89NDlqyE/view">sorting
+        guidelines</a> before visiting a garage.</p>
+  </div>
+  <div id='calendar'></div>
+
+  <div class="box-tip">
+    <p><b>📅 Calendar sources</b> • <button class='custom-button'
+        onclick='history.pushState(null, null, " "); hashchange()'>show all</button></p>
+    <div id="legend-feeds"></div>
+    <p><small><b>💡 Tips:</b> you can show only one calendar by clicking (👁) • to import the ics feeds to your calendar
+        app, download the ics or copy (🔗) the corresponding link address from this box</small></p>
+  </div>
+
+  <footer><span>🄯 balsoft 2025</span> • <a href="https://github.com/balsoft/parki-ar-minda-calendar">Source code</a>
+  </footer>
 </body>
+
 </html>

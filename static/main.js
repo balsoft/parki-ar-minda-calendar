@@ -123,6 +123,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     themeSystem: "bootstrap5",
     height: "auto",
     nowIndicator: true,
+    allDaySlot: false,
 
     locale: "en-gb",
 

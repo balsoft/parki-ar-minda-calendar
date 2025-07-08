@@ -124,10 +124,10 @@ document.addEventListener("DOMContentLoaded", async function() {
     height: "auto",
     nowIndicator: true,
     allDaySlot: false,
+    slotMinTime: "08:00:00",
+    slotMaxTime: "23:00:00",
 
     locale: "en-gb",
-
-    eventSources: document.sources,
 
     eventTimeFormat: { // like '14:30'
       hour: '2-digit',
@@ -135,6 +135,8 @@ document.addEventListener("DOMContentLoaded", async function() {
       meridiem: false,
       hour12: false,
     },
+
+    eventSources: document.sources,
 
     // Runs when the event is added to DOM
     eventDidMount: function(info) {

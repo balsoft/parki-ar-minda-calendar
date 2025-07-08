@@ -84,13 +84,12 @@ document.addEventListener("DOMContentLoaded", async function() {
   document.sources = await sourcesPromise
 
   for (source of document.sources) {
-    var link = source.url.match("https://") ? source.url : `${document.location}/${source.url}`
+    var link = source.url.match(/https?:\/\//) ? source.url : `${`${document.location}`.replace("/index.html", "")}/${source.url}`
 
     $("#legend-feeds").append(`
             <div class="calendar-feed" id="calendar-feed-${source.id}">
                 <input type=checkbox checked onclick="toggleVis('${source.id}')" style="accent-color: ${source.color}"/>
-                <span><a href="${source.url}" style="color: black" class="source-id">${source.id}</a></span>
-                <span title="Copy ics URL to clipboard" style="cursor: default" onclick="navigator.clipboard.writeText('${link}')">🔗</span>
+                <span><a href="${link.replace(/https?/, "webcal")}" style="color: black" class="source-id">${source.id}</a></span>
                 <a href="#${source.id}" style="color: black; text-decoration: none" title="Only show ${source.id}">👁</a>
             </div>
         `)

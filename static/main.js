@@ -28,8 +28,10 @@ async function makeSource(source) {
   let url = `${pamConfig.icsDirectory}/${source}`
   let sourceInfo = await fetch(url)
 
-  jcal = ICAL.parse(await sourceInfo.text())
-  color = (new ICAL.Component(jcal)).getFirstPropertyValue("color") || hash_color(source)
+  let jcal = ICAL.parse(await sourceInfo.text())
+  let component = new ICAL.Component(jcal)
+  if (!component.getFirstSubcomponent("vevent")) return null
+  color = component.getFirstPropertyValue("color") || hash_color(source)
   textColor = isLight(jQuery.Color(color)) ? "black" : "white";
   return { id: source.replace(".ics", ""), url, format: "ics", color, textColor }
 }
@@ -47,7 +49,6 @@ async function fetchSources() {
     window.alert("Incorrect source type specified, ignoring")
   }
   return Promise.all(names.map(makeSource))
-
 }
 
 async function toggleVis(id) {
@@ -81,7 +82,7 @@ function hashchange() {
 const sourcesPromise = fetchSources()
 
 document.addEventListener("DOMContentLoaded", async function() {
-  document.sources = await sourcesPromise
+  document.sources = (await sourcesPromise).filter(Boolean)
 
   for (source of document.sources) {
     var link = source.url.match(/https?:\/\//) ? source.url : `${`${document.location}`.replace("/index.html", "")}/${source.url}`

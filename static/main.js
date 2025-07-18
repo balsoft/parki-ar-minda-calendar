@@ -24,6 +24,8 @@ function isLight(color) {
   return luminance >= 0.65
 }
 
+var anyAllDays = false
+
 async function makeSource(source) {
   let url = `${pamConfig.icsDirectory}/${source}`
   let sourceInfo = await fetch(url)
@@ -31,6 +33,12 @@ async function makeSource(source) {
   let jcal = ICAL.parse(await sourceInfo.text())
   let component = new ICAL.Component(jcal)
   if (!component.getFirstSubcomponent("vevent")) return null
+  for (event of component.getAllSubcomponents("vevent")) {
+    for (start of event.getAllProperties("dtstart")) {
+      console.log(start.getFirstValue()._time)
+      if (start.getFirstValue()._time.isDate) anyAllDays = true
+    }
+  }
   color = component.getFirstPropertyValue("color") || hash_color(source)
   textColor = isLight(jQuery.Color(color)) ? "black" : "white";
   return { id: source.replace(".ics", ""), url, format: "ics", color, textColor }
@@ -82,6 +90,7 @@ function hashchange() {
 const sourcesPromise = fetchSources()
 
 document.addEventListener("DOMContentLoaded", async function() {
+  // Filter out null values
   document.sources = (await sourcesPromise).filter(Boolean)
 
   for (source of document.sources) {
@@ -123,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     themeSystem: "bootstrap5",
     height: "auto",
     nowIndicator: true,
-    allDaySlot: false,
+    allDaySlot: anyAllDays,
     slotMinTime: "08:00:00",
     slotMaxTime: "23:00:00",
 
@@ -150,12 +159,24 @@ document.addEventListener("DOMContentLoaded", async function() {
         return what.toString().padStart(length, "0")
       }
 
+      function renderDate(date) {
       // How does this even work...
-      var date = document.calendar.formatDate(info.event.start, { year: "numeric", month: "short", day: "numeric", weekday: "long" })
+        return document.calendar.formatDate(date, { year: "numeric", month: "short", day: "numeric", weekday: "long" })
+      }
 
-      function renderTime(time) { return `${pad0(2, time.getHours())}:${pad0(2, time.getMinutes())}` }
+      startdate = renderDate(info.event.start)
 
-      var content = `<b>📅</b> ${date}<br><b>⏰</b> ${renderTime(info.event.start)} - ${renderTime(info.event.end)}`
+      var content = `<b>📅</b> ${startdate}`
+
+      enddate = renderDate(new Date(info.event.end - 1))
+
+      if (startdate != enddate) {
+        content += ` - ${renderDate(info.event.end)}`
+      }
+      if (!info.event.allDay) {
+        function renderTime(time) { return `${pad0(2, time.getHours())}:${pad0(2, time.getMinutes())}` }
+        content += `<br><b>⏰</b> ${renderTime(info.event.start)} - ${renderTime(info.event.end)}`
+      }
 
       if (info.event.extendedProps.location) {
         var location = info.event.extendedProps.location.replace(/https:\/\/[^ ]*/, "").replace("\n", "<br>")

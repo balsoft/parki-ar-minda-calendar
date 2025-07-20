@@ -106,7 +106,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
   }
 
-
   document.calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
     plugins: [FullCalendar.ICalendar.default],
 
@@ -207,6 +206,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     // Prevent just following the event URL, open a popover instead
     eventClick: function(info) {
       info.jsEvent.preventDefault()
+      $('.fc-event').not(info.el).popover('hide');
     }
   })
 
